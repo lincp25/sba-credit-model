@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What does a small business loan cost a bank? — an expected loss model on 1.4m SBA loans</title>
+<meta name="description" content="An interactive expected loss model built on 1,391,586 SBA 7(a) loans, FY2000 to FY2026. Pick a borrower and watch the model price them.">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="shell">
+
+<!-- ==================================================== borrower rail -->
+<aside class="rail" aria-label="Borrower controls">
+  <div class="rail-mark">The borrower
+    <span>Every figure on this page is computed for this profile.</span>
+  </div>
+  <hr>
+
+  <div class="fields">
+    <div class="field"><label for="f-size">Loan size</label><select id="f-size"></select></div>
+    <div class="field"><label for="f-sector">Industry</label><select id="f-sector"></select></div>
+    <div class="field"><label for="f-bt">Business type</label><select id="f-bt"></select></div>
+    <div class="field"><label for="f-prog">SBA programme</label><select id="f-prog"></select></div>
+    <div class="field"><label for="f-col">Collateral</label>
+      <select id="f-col"><option value="0">Unsecured</option><option value="1">Secured</option></select></div>
+    <div class="field"><label for="f-reg">Economic regime</label>
+      <select id="f-reg">
+        <option value="benign">Benign</option>
+        <option value="through-cycle" selected>Through the cycle</option>
+        <option value="crisis">Crisis</option>
+      </select></div>
+  </div>
+
+  <div id="macro-box">
+    <hr>
+    <h4>Economy, through the cycle</h4>
+    <div class="field"><label for="f-un">Unemployment rate</label>
+      <div class="slider"><input type="range" id="f-un" min="0" max="15" step="0.5" value="6"><output id="o-un">6.0%</output></div></div>
+    <div class="field"><label for="f-pr">Prime rate</label>
+      <div class="slider"><input type="range" id="f-pr" min="0" max="12" step="0.25" value="5"><output id="o-pr">5.00%</output></div></div>
+    <div class="field"><label for="f-hp">House price growth</label>
+      <div class="slider"><input type="range" id="f-hp" min="-20" max="15" step="0.5" value="0"><output id="o-hp">0.0%</output></div></div>
+    <p class="note" id="macro-note" style="color:#7E939E;font-size:11.5px;margin:8px 0 0">Coefficients: unemployment +0.1183, prime +0.0234, house price growth &minus;0.0314, in log-odds per percentage point. Applied under through-cycle only; the benign and crisis intercepts already carry the cycle. These are constants set on the workbook's calculator sheet, not estimated parameters.</p>
+  </div>
+
+  <div class="readout">
+    <div class="big" id="r-el">—</div>
+    <div class="cap">Expected loss on every dollar lent, over five years</div>
+  </div>
+  <div class="readout">
+    <div class="kv"><span>Defaults within 1 year</span><span id="r-pd12">—</span></div>
+    <div class="kv"><span>Defaults within 3 years</span><span id="r-pd36">—</span></div>
+    <div class="kv"><span>Defaults within 5 years</span><span id="r-pd60">—</span></div>
+    <div class="kv"><span>Lost if it defaults</span><span id="r-lgd">—</span></div>
+    <div class="kv"><span>Riskier than</span><span id="r-rank">—</span></div>
+    <div class="kv"><span>Loans behind this</span><span id="r-n">—</span></div>
+    <div class="kv"><span>Average loan</span><span id="r-avg">—</span></div>
+  </div>
+  <div id="r-warn"></div>
+</aside>
+
+<!-- ============================================================= main -->
+<main class="main">
+
+<section class="hero">
+  <div class="wrap">
+    <h1>An expected loss model for SBA 7(a) small business loans</h1>
+    <p class="lead">A bank has to price a loan before it knows how the loan turns out. This model
+      does that from the record of 1,391,586 SBA-guaranteed loans approved between FY2000 and FY2026.
+      Probability of default is a discrete-time hazard model with regime-specific coefficients; loss
+      severity is measured from realised charge-offs. The two combine into an expected loss for each
+      of 5,040 borrower profiles, which is then set against the rates lenders actually charged and
+      against what the loan costs a bank to make.</p>
+    <p class="lead">Set a profile in the panel on the left. Everything below recalculates for it.</p>
+
+    <div class="stats">
+      <div class="stat"><b class="tnum">1,391,586</b><span>loans, FY2000&ndash;FY2026</span></div>
+      <div class="stat"><b class="tnum">5,040</b><span>borrower profiles modelled</span></div>
+      <div class="stat"><b class="tnum">0.957</b><span>out-of-sample R&sup2;, first ten years</span></div>
+      <div class="stat"><b class="tnum">237</b><span>profiles that need the guarantee</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ---------------------------------------------------------- the loan -->
+<section class="band" id="s-loan">
+  <div class="wrap">
+    <div class="band-head">
+      <div class="step ui">Probability of default</div>
+      <h2>Default risk over the life of the loan</h2>
+      <p>Cumulative default for a cohort of 100 identical loans, quarter by quarter, out to ten
+        years. Default risk is not one number, it is a curve, and the curve is what a lender is
+        underwriting. The age effect is estimated every three months and applied on top of five
+        borrower coefficients and a regime intercept.</p>
+    </div>
+
+    <div class="fig">
+      <div class="fig-top">
+        <h3 id="surv-title">Loans performing, per 100 originated</h3>
+        <div class="ctl">
+          <span class="lbl">Show</span>
+          <div class="seg" id="surv-mode">
+            <button data-v="surv" aria-pressed="true">Performing</button>
+            <button data-v="haz" aria-pressed="false">Monthly default rate</button>
+          </div>
+          <button class="btn" id="btn-regimes">Compare all three regimes</button>
+        </div>
+      </div>
+      <div id="fig-surv"></div>
+      <p class="figcap" id="cap-surv"></p>
+    </div>
+
+    <div class="cols2">
+      <div class="fig">
+        <div class="fig-top"><h3>Contribution of each borrower attribute</h3></div>
+        <div id="fig-water"></div>
+        <p class="figcap">Each coefficient expressed as a multiplier on the odds of default, relative
+          to the reference profile: corporation, accommodation and food, $150&ndash;350K, Community
+          Express, unsecured. Bars show the odds ratio, not expected loss.</p>
+      </div>
+      <div class="fig">
+        <div class="fig-top"><h3>Effect of changing one attribute</h3></div>
+        <div id="fig-swaps"></div>
+        <p class="figcap">Each attribute varied one at a time, holding the rest fixed, ranked by change
+          in five-year expected loss.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ------------------------------------------------------- seasoning -->
+<section class="band" id="s-season">
+  <div class="wrap">
+    <div class="band-head">
+      <div class="step ui">Underlying data</div>
+      <h2>The riskiest year is not the first one</h2>
+      <p>Life-table default rates straight from the loan record, with no model applied. The
+        conventional expectation is that a loan is riskiest when new and then seasons out. These
+        loans do season out, but not for seven to ten years, and larger loans turn later than small
+        ones. Each vintage window covers a different span, from 26 years for the 2000&ndash;2004
+        cohort down to 13 for 2013&ndash;2016.</p>
+      <p class="note">Charge-offs are recorded with an administrative lag, so observed peaks sit
+        later than the underlying defaults occurred. The shape is reliable; the exact month is not.</p>
+    </div>
+
+    <div class="fig">
+      <div class="fig-top">
+        <h3>Observed default rate by loan age</h3>
+        <div class="ctl">
+          <span class="lbl">Vintages</span>
+          <div class="seg" id="sea-era">
+            <button data-v="all" aria-pressed="true">All</button>
+            <button data-v="pre_crisis" aria-pressed="false">2000&ndash;04</button>
+            <button data-v="cohort_2005_12" aria-pressed="false">2005&ndash;12</button>
+            <button data-v="post_crisis" aria-pressed="false">2013&ndash;16</button>
+          </div>
+          <div class="seg" id="sea-mode">
+            <button data-v="haz" aria-pressed="true">Monthly rate</button>
+            <button data-v="cum" aria-pressed="false">Cumulative</button>
+          </div>
+          <label class="chk"><input type="checkbox" id="sea-ghost" checked> keep previous</label>
+          <label class="chk"><input type="checkbox" id="sea-pool"> show loans still at risk</label>
+        </div>
+      </div>
+      <div id="fig-season"></div>
+      <p class="figcap" id="cap-season"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ------------------------------------------------------ validation -->
+<section class="band" id="s-valid">
+  <div class="wrap">
+    <div class="band-head">
+      <div class="step ui">Validation</div>
+      <h2>Predicted against observed default rates</h2>
+      <p>The model was fitted on one sample and tested on a disjoint holdout. Predicted and observed
+        monthly default rates are shown by loan age. The observed series starts hidden, which makes
+        for a fairer test of the chart than reading the R&sup2; off a caption.</p>
+    </div>
+
+    <div class="fig">
+      <div class="fig-top">
+        <h3 id="val-title">Predicted against actual default rate, by loan age</h3>
+        <div class="ctl">
+          <div class="seg" id="val-set">
+            <button data-v="holdout" aria-pressed="true">Unseen loans</button>
+            <button data-v="fit" aria-pressed="false">Training loans</button>
+          </div>
+          <button class="btn on" id="btn-guess">Hide observed series</button>
+        </div>
+      </div>
+      <div id="fig-valid"></div>
+      <p class="figcap" id="cap-valid"></p>
+    </div>
+
+    <div class="fig">
+      <div class="fig-top"><h3>Prediction error by segment</h3>
+        <div class="ctl"><span class="lbl">Segments with 100 or more observed defaults</span></div>
+      </div>
+      <div id="fig-errors"></div>
+      <p class="figcap">One marker per size-and-industry segment. Positive error means the model
+        over-predicted the monthly default rate.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ------------------------------------------------------- scorecard -->
+<section class="band" id="s-score">
+  <div class="wrap">
+    <div class="band-head">
+      <div class="step ui">All profiles</div>
+      <h2>Rate charged against rate required</h2>
+      <p>Each profile's observed average rate against the rate needed to cover funding, capital,
+        servicing, origination and expected loss. The diagonal is break-even. Everything below it is
+        priced under cost, which is a large share of the chart.</p>
+    </div>
+
+    <div class="fig">
+      <div class="fig-top">
+        <h3>Rate charged against the rate the loan needs</h3>
+        <div class="ctl">
+          <button class="btn" id="sc-thin">Only segments with 100+ loans</button>
+          <button class="btn" id="sc-under">Highlight loans that need the guarantee</button>
+          <label class="chk"><input type="checkbox" id="sc-guar"> price with the guarantee</label>
+        </div>
+      </div>
+      <div id="fig-scatter"></div>
+      <p class="figcap" id="cap-scatter"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ------------------------------------------------------------- LGD -->
+<section class="band" id="s-lgd">
+  <div class="wrap">
+    <div class="band-head">
+      <div class="step ui">Loss given default</div>
+      <h2>Small loans fail more often, and they fail worse</h2>
+      <p>Charge-off as a share of the original loan amount, for loans that defaulted, by size band
+        and industry. This is the second term in expected loss, and it runs in the same direction as
+        the first: the loans most likely to default are also the ones that lose most when they do.</p>
+    </div>
+
+    <div class="fig">
+      <div class="fig-top">
+        <h3>Loss on default, by loan size and industry</h3>
+        <div class="ctl">
+          <label class="chk"><input type="checkbox" id="lgd-thin" checked> fade cells resting on under 100 defaults</label>
+        </div>
+      </div>
+      <div id="fig-lgd"></div>
+      <p class="figcap" id="cap-lgd"></p>
+    </div>
+
+    <div class="fig">
+      <div class="fig-top"><h3>Which characteristic drives severity</h3>
+        <div class="ctl"><button class="btn on" id="btn-driver">Show me</button></div>
+      </div>
+      <div id="fig-driver"></div>
+      <p class="figcap" id="cap-driver"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ------------------------------------------------------- guarantee -->
+<section class="band" id="s-guar">
+  <div class="wrap">
+    <div class="band-head">
+      <div class="step ui">Guarantee</div>
+      <h2>How much guarantee does this borrower need?</h2>
+      <p>The SBA does not lend. It guarantees a share of each loan, absorbing that share of the loss
+        and cutting the capital a lender has to hold. So every profile has a minimum guarantee at
+        which the observed rate covers cost. For 472 of the 764 profiles with 100 or more loans and
+        a recorded rate, that minimum is zero.</p>
+    </div>
+
+    <div class="fig">
+      <div class="fig-top">
+        <h3 id="gs-title">Cost of this loan, against what lenders charged it</h3>
+        <div class="ctl">
+          <span class="lbl">Funding</span>
+          <select id="gs-fund" style="width:auto;background:#fff;color:var(--ink);border-color:var(--rule)"></select>
+          <span class="lbl">Origination cost</span>
+          <div class="slider" style="width:190px"><input type="range" id="gs-orig" min="1000" max="20000" step="500" value="3500"><output id="o-orig">$3,500</output></div>
+        </div>
+      </div>
+      <div id="fig-stack"></div>
+      <p class="figcap" id="cap-stack"></p>
+    </div>
+
+    <div class="fig">
+      <div class="fig-top">
+        <h3>Profiles clearing cost, by guarantee level</h3>
+        <div class="ctl">
+          <span class="lbl">Guarantee</span>
+          <div class="slider" style="width:230px"><input type="range" id="gp-g" min="0" max="90" step="5" value="0"><output id="o-gp">0%</output></div>
+        </div>
+      </div>
+      <div id="fig-policy"></div>
+      <p class="figcap" id="cap-policy"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ----------------------------------------------------------- limits -->
+<section class="band" id="s-limits">
+  <div class="wrap">
+    <div class="band-head">
+      <div class="step ui">Limitations</div>
+      <h2>What this cannot tell you</h2>
+    </div>
+    <div class="limits">
+      <ul>
+        <li id="lim-lag">Charge-offs are recorded with an administrative lag. Defaults are dated
+          later than they occurred, shifting the seasoning curve right by an unknown amount.</li>
+        <li id="lim-rate">Interest rates appear in the SBA record only from FY2009. Pricing results
+          rest on the post-2009 book, not the full twenty-six years.</li>
+        <li id="lim-bal">Loss is measured against the original loan amount rather than the balance
+          outstanding at default, overstating severity on long-seasoned loans.</li>
+        <li id="lim-rej">The data covers approved loans only, with nothing on applicants who were
+          declined. That is the population an access-to-capital argument most needs.</li>
+      </ul>
+    </div>
+    <p class="note" style="margin-top:22px;max-width:66ch">Two modelling choices are not implied by
+      the data. Five-year expected loss is annualised by dividing by five, though realised losses are
+      back-loaded. Capital is charged only on the unguaranteed portion, on the basis that a
+      government guarantee carries a zero risk weight. The macroeconomic coefficients on the
+      calculator sheet are hardcoded constants rather than estimated parameters, and apply only under
+      the through-cycle regime.</p>
+  </div>
+</section>
+
+<footer class="band foot">
+  <div class="wrap">
+    <p>Sources: SBA 7(a) FOIA loan-level release as of 31 March 2026; FDIC call reports for bank
+      funding cost, capital ratios and operating cost. Model, data and source for this page are on
+      <a href="https://github.com/YOUR-USERNAME/YOUR-REPO">GitHub</a>.</p>
+    <p class="note">Not investment advice or a credit recommendation.</p>
+  </div>
+</footer>
+
+</main>
+</div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
