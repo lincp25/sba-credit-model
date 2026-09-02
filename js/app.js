@@ -957,6 +957,6 @@ function syncAssumptions() {
   const changed = Object.keys(o).filter(k => A[k] !== o[k]);
   $('#a-reset').hidden = changed.length === 0;
   const h = document.querySelector('.assump-head h4');
-  h.innerHTML = 'Assumptions' + (changed.length
+  h.innerHTML = 'Values used' + (changed.length
     ? `<span class="badge">${changed.length} changed</span>` : '');
 }

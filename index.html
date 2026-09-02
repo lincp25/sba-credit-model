@@ -11,13 +11,18 @@
 <div class="shell">
 
 <!-- ==================================================== borrower rail -->
-<aside class="rail" aria-label="Borrower controls">
-  <div class="rail-mark">The borrower
-    <span>All figures on this page are computed for the profile specified below.</span>
+<aside class="rail" aria-label="Model controls">
+  <div class="rail-mark">SBA 7(a) expected loss model
+    <span>Two sets of controls. The first describes one borrower. The second sets what a loan costs
+      a bank to make.</span>
   </div>
-  <hr>
 
-  <div class="fields">
+  <div class="group">
+    <div class="group-tag">1 &middot; The borrower</div>
+    <p class="group-note">Who is borrowing. Drives the loss on this one loan, and every figure on
+      the page recalculates for it.</p>
+  </div>
+<div class="fields">
     <div class="field"><label for="f-size">Loan size</label><select id="f-size"></select></div>
     <div class="field"><label for="f-sector">Industry</label><select id="f-sector"></select></div>
     <div class="field"><label for="f-bt">Business type</label><select id="f-bt"></select></div>
@@ -44,14 +49,35 @@
     <p class="note" id="macro-note" style="color:#7E939E;font-size:11.5px;margin:8px 0 0">Coefficients: unemployment +0.1183, prime +0.0234, house price growth &minus;0.0314, in log-odds per percentage point. These apply under through-cycle only, since the benign and crisis intercepts already carry the cycle. These are constants set on the workbook's calculator sheet, not estimated parameters.</p>
   </div>
 
-  <hr>
+  <div class="readout">
+    <div class="big" id="r-el">—</div>
+    <div class="cap">Expected loss on every dollar lent to this borrower, over five years</div>
+  </div>
+  <div class="readout">
+    <div class="kv"><span>Defaults within 1 year</span><span id="r-pd12">—</span></div>
+    <div class="kv"><span>Defaults within 3 years</span><span id="r-pd36">—</span></div>
+    <div class="kv"><span>Defaults within 5 years</span><span id="r-pd60">—</span></div>
+    <div class="kv"><span>Lost if it defaults</span><span id="r-lgd">—</span></div>
+    <div class="kv"><span>Riskier than</span><span id="r-rank">—</span></div>
+    <div class="kv"><span>Loans behind this</span><span id="r-n">—</span></div>
+    <div class="kv"><span>Average loan</span><span id="r-avg">—</span></div>
+  </div>
+  <div id="r-warn"></div>
+
+  <div class="group group-b">
+    <div class="group-tag">2 &middot; Cost assumptions</div>
+    <p class="group-note">What the loan costs the bank. Drives what a loan must earn to break even,
+      and therefore how many profiles clear it. Leaves default rates and loss severity untouched,
+      since those are measured from the loan record.</p>
+  </div>
+<hr>
   <div class="assump">
     <div class="assump-head">
-      <h4 style="margin:0">Assumptions</h4>
+      <h4 style="margin:0">Values used</h4>
       <button class="reset" id="a-reset" hidden>Reset</button>
     </div>
-    <p class="note" style="color:#7E98B4;font-size:11px;margin:0 0 12px">Values shown are those
-      used in the study. Altering any of them re-prices every figure on the page.</p>
+    <p class="note" style="color:#7E98B4;font-size:11px;margin:0 0 12px">These are the figures used in
+      the study. Change any of them to test how far the result holds.</p>
 
     <div class="field"><label for="a-fund">Bank cost of funds</label><select id="a-fund"></select></div>
     <div class="field"><label for="a-cap">Capital charge</label><select id="a-cap"></select></div>
@@ -74,29 +100,16 @@
   </div>
 
   <div class="live">
-    <h4 style="margin:0 0 2px">Of <span id="l-tot">766</span> priceable profiles</h4>
-    <p class="note" style="color:#7E98B4;font-size:10.5px;margin:0 0 10px">Updates as you change any
-      assumption above.</p>
+    <h4 style="margin:0 0 2px">What clears, of <span id="l-tot">766</span> profiles</h4>
+    <p class="note" style="color:#7E98B4;font-size:10.5px;margin:0 0 10px">Moves with the cost
+      assumptions above. Unaffected by the borrower you pick.</p>
     <div class="live-row"><span class="dot ok"></span><span>Clear unaided</span><b id="l-a">472</b></div>
     <div class="live-row"><span class="dot mid"></span><span>Need the guarantee</span><b id="l-b">237</b></div>
     <div class="live-row"><span class="dot no"></span><span>Never clear</span><b id="l-c">57</b></div>
     <div class="live-bar"><i id="l-ba"></i><i id="l-bb"></i><i id="l-bc"></i></div>
   </div>
 
-  <div class="readout">
-    <div class="big" id="r-el">—</div>
-    <div class="cap">Expected loss on every dollar lent, over five years</div>
-  </div>
-  <div class="readout">
-    <div class="kv"><span>Defaults within 1 year</span><span id="r-pd12">—</span></div>
-    <div class="kv"><span>Defaults within 3 years</span><span id="r-pd36">—</span></div>
-    <div class="kv"><span>Defaults within 5 years</span><span id="r-pd60">—</span></div>
-    <div class="kv"><span>Lost if it defaults</span><span id="r-lgd">—</span></div>
-    <div class="kv"><span>Riskier than</span><span id="r-rank">—</span></div>
-    <div class="kv"><span>Loans behind this</span><span id="r-n">—</span></div>
-    <div class="kv"><span>Average loan</span><span id="r-avg">—</span></div>
-  </div>
-  <div id="r-warn"></div>
+  
 </aside>
 
 <!-- ============================================================= main -->
