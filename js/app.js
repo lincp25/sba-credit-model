@@ -674,6 +674,8 @@ function renderLGD() {
   M.BANDS.forEach((b, i) => s.appendChild(C.el('text', {
     x: m.l + i * cw + cw / 2, y: m.t - 12, 'text-anchor': 'middle', class: 'serieslab', fill: COL.ink
   }, b)));
+  s.appendChild(C.el('text', { x: m.l - 10, y: m.t - 12, 'text-anchor': 'end', class: 'axlab' },
+    '% of principal'));
 
   sectors.forEach((sec, r) => {
     const yy = m.t + r * ch;
@@ -694,7 +696,7 @@ function renderLGD() {
       if (v != null) g.appendChild(C.el('text', {
         x: m.l + i * cw + cw / 2, y: yy + 20, 'text-anchor': 'middle',
         class: 'serieslab', fill: thin && S.lgdThin ? '#5B6C77' : '#fff'
-      }, (v * 100).toFixed(0)));
+      }, (v * 100).toFixed(0) + '%'));
       if (c) C.hoverable(g, `<b>${b} · ${sec}</b><br>${(c.lgd * 100).toFixed(1)}% of principal lost<br>
         ${M.fmtNum(c.defaults)} defaults, ${M.fmtUSD(c.charge_off)} charged off
         ${thin ? '<br><span style="color:#E8CE94">under 100 defaults, so the model uses the size-band average instead</span>' : ''}`);
@@ -714,7 +716,9 @@ function renderLGD() {
     return tot ? sec / tot : null;
   };
   $('#cap-lgd').innerHTML =
-    `Darker is worse. Reading across, the gradient runs left to right in almost every industry:
+    `Each cell is the percentage of the original loan amount written off, averaged over the loans in
+     that cell that defaulted. Darker is worse. Reading across, the gradient runs left to right in
+     almost every industry:
      <b>a defaulted loan under $50K loses ${(fb['<50K'] * 100).toFixed(0)}% of principal, while one
      over $1M loses ${(fb['1M+'] * 100).toFixed(0)}%.</b> One measurable reason sits in the same data:
      only ${(secShare('<50K') * 100).toFixed(0)}% of sub-$50K loans are secured at all, against
@@ -753,10 +757,10 @@ function renderDriver() {
      ${(d.size_band.range * 100).toFixed(1)}.</b> Secured loans lose
      ${(d.collateral.rows.find(r => /true/i.test(r.label))?.lgd * 100).toFixed(1)}% of principal on
      default against ${(d.collateral.rows.find(r => /false/i.test(r.label))?.lgd * 100).toFixed(1)}%
-     for unsecured, a difference within the range of noise. Collateral is conventionally the first
-     item examined in credit assessment, but it carries no measurable information about severity in
-     this record. Severity is therefore keyed off size and industry. Collateral is retained in the
-     default probability, where its coefficient remains material.`;
+     for unsecured, a difference within the range of noise. Collateral is conventionally the first item examined in credit assessment, yet in this record it
+     carries no measurable information about severity. Severity is therefore keyed off size and
+     industry. Collateral is retained in the default probability, where its coefficient remains
+     material.`;
 }
 
 /* ========================================================= cost stack */
@@ -908,6 +912,14 @@ function renderSplit() {
   const D = a => a.reduce((x, r) => x + r[ix.dollars], 0);
   const L = a => a.reduce((x, r) => x + r[ix.loans], 0);
   const tD = D(rows), tL = L(rows);
+  // mirror the split into the rail, right under the assumption controls
+  const set = (id, v) => { const n = $(id); if (n) n.textContent = v; };
+  set('#l-tot', M.fmtNum(rows.length));
+  set('#l-a', alone.length); set('#l-b', needs.length); set('#l-c', never.length);
+  [['#l-ba', alone], ['#l-bb', needs], ['#l-bc', never]].forEach(([id, a]) => {
+    const n = $(id); if (n) n.style.width = (100 * a.length / (rows.length || 1)) + '%';
+  });
+
   const line = (label, a, cls) => `<tr>
       <td><span class="pill ${cls}">${label}</span></td>
       <td style="text-align:right"><b>${a.length}</b></td>
@@ -926,8 +938,7 @@ function renderSplit() {
     <p class="figcap">This is the result toward which the preceding sections build.
       <b>${needs.length} profiles clear only because the guarantee exists.</b> They are
       ${(100 * L(needs) / tL).toFixed(0)}% of all loans and ${(100 * D(needs) / tD).toFixed(1)}% of
-      all dollars. The guarantee therefore functions less as a subsidy on volume than as a mechanism for
-      reaching a large number of very small borrowers:
+      all dollars. Its effect therefore falls on a large number of very small borrowers:
       ${needs.filter(r => r[ix.size] === '<50K' || r[ix.size] === '50-150K').length} of the
       ${needs.length} are loans under $150,000. A further ${never.length} profiles do not clear even
       at their full guarantee.</p>`;

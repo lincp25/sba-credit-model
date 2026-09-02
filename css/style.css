@@ -195,3 +195,14 @@ input[type=range]::-moz-range-thumb{
 .assump .field{margin-bottom:11px}
 .badge{display:inline-block;background:#B5821A;color:#221703;border-radius:99px;
   font-size:10px;font-weight:700;padding:1px 7px;margin-left:7px;vertical-align:2px}
+
+/* live split readout in the rail */
+.live{border-top:1px solid #23425F;padding-top:15px;margin-top:16px}
+.live-row{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12.5px;color:#A9C0D6}
+.live-row span:nth-child(2){flex:1}
+.live-row b{font-weight:700;color:#fff;font-variant-numeric:tabular-nums;font-size:14px}
+.dot{width:8px;height:8px;border-radius:50%;flex:0 0 8px}
+.dot.ok{background:#3FAE92}.dot.mid{background:#D9A63C}.dot.no{background:#D9645C}
+.live-bar{display:flex;height:6px;border-radius:99px;overflow:hidden;margin-top:10px;background:#1B3A5C}
+.live-bar i{display:block;height:100%;transition:width .25s}
+#l-ba{background:#3FAE92}#l-bb{background:#D9A63C}#l-bc{background:#D9645C}

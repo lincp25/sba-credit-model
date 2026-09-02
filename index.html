@@ -41,7 +41,7 @@
       <div class="slider"><input type="range" id="f-pr" min="0" max="12" step="0.25" value="5"><output id="o-pr">5.00%</output></div></div>
     <div class="field"><label for="f-hp">House price growth</label>
       <div class="slider"><input type="range" id="f-hp" min="-20" max="15" step="0.5" value="0"><output id="o-hp">0.0%</output></div></div>
-    <p class="note" id="macro-note" style="color:#7E939E;font-size:11.5px;margin:8px 0 0">Coefficients: unemployment +0.1183, prime +0.0234, house price growth &minus;0.0314, in log-odds per percentage point. Applied under through-cycle only; the benign and crisis intercepts already carry the cycle. These are constants set on the workbook's calculator sheet, not estimated parameters.</p>
+    <p class="note" id="macro-note" style="color:#7E939E;font-size:11.5px;margin:8px 0 0">Coefficients: unemployment +0.1183, prime +0.0234, house price growth &minus;0.0314, in log-odds per percentage point. These apply under through-cycle only, since the benign and crisis intercepts already carry the cycle. These are constants set on the workbook's calculator sheet, not estimated parameters.</p>
   </div>
 
   <hr>
@@ -73,6 +73,16 @@
       <div class="slider"><input type="range" id="a-min" min="0" max="500" step="25" value="100"><output id="o-min">100</output></div></div>
   </div>
 
+  <div class="live">
+    <h4 style="margin:0 0 2px">Of <span id="l-tot">766</span> priceable profiles</h4>
+    <p class="note" style="color:#7E98B4;font-size:10.5px;margin:0 0 10px">Updates as you change any
+      assumption above.</p>
+    <div class="live-row"><span class="dot ok"></span><span>Clear unaided</span><b id="l-a">472</b></div>
+    <div class="live-row"><span class="dot mid"></span><span>Need the guarantee</span><b id="l-b">237</b></div>
+    <div class="live-row"><span class="dot no"></span><span>Never clear</span><b id="l-c">57</b></div>
+    <div class="live-bar"><i id="l-ba"></i><i id="l-bb"></i><i id="l-bc"></i></div>
+  </div>
+
   <div class="readout">
     <div class="big" id="r-el">—</div>
     <div class="cap">Expected loss on every dollar lent, over five years</div>
@@ -95,19 +105,21 @@
 <section class="hero">
   <div class="wrap">
     <h1>An expected loss model for SBA 7(a) small business loans</h1>
-    <p class="lead">A bank has to price a loan before it knows how the loan turns out. This model
-      does that from the record of 1,391,586 SBA-guaranteed loans approved between FY2000 and FY2026.
-      Probability of default is a discrete-time hazard model with regime-specific coefficients; loss
-      severity is measured from realised charge-offs. The two combine into an expected loss for each
-      of 5,040 borrower profiles, which is then set against the rates lenders actually charged and
+    <p class="lead">A bank has to price a loan before it knows how the loan turns out. What it has
+      to go on is the record of the loans that came before.</p>
+    <p class="lead">Here that record runs to 1,391,586 SBA-guaranteed loans approved between 2000 and
+      2026. How often a borrower defaults is estimated from a hazard model fitted to loan age,
+      carrying separate coefficients for benign, average and crisis conditions. How much is lost when
+      one does is measured from realised charge-offs. Together they give an expected loss for each of
+      5,040 kinds of borrower. What remains is to weigh that against the rates lenders charged, and
       against what the loan costs a bank to make.</p>
     <p class="thesis">Most SBA lending would happen without the government. Of the profiles this
       model can price, 472 cover their own cost unaided. The programme's real work sits in a narrow
       band underneath: a further 237 profiles clear only because the guarantee is there, and they are
-      a third of all loans but barely 5% of the dollars. The guarantee is not subsidising volume. It
-      is reaching a large number of very small borrowers.</p>
-    <p class="lead">The case is set out in six sections. Selecting a profile in the panel on the
-      left recalculates every figure for that borrower.</p>
+      a third of all loans but barely 5% of the dollars. Its effect falls on a large number of very
+      small borrowers rather than on the volume of lending.</p>
+    <p class="lead">Selecting a profile in the panel on the left recalculates every figure below
+      for that borrower.</p>
 
     <div class="stats">
       <div class="stat"><b class="tnum">1,391,586</b><span>loans, FY2000&ndash;FY2026</span></div>
@@ -122,7 +134,7 @@
 <section class="band" id="s-season">
   <div class="wrap">
     <div class="band-head">
-      <div class="step ui">One. Timing</div>
+      <div class="step ui">Timing</div>
       <h2>The riskiest year is not the first one</h2>
       <p>Life-table default rates straight from the loan record, with no model applied. The
         conventional expectation is that a loan is riskiest when new and then seasons out. These
@@ -130,7 +142,8 @@
         ones. Each vintage window covers a different span, from 26 years for the 2000&ndash;2004
         cohort down to 13 for 2013&ndash;2016.</p>
       <p class="note">Charge-offs are recorded with an administrative lag, so observed peaks sit
-        later than the underlying defaults occurred. The shape is reliable; the exact month is not.</p>
+        later than the underlying defaults occurred. Read the shape of these curves rather than the
+        precise month of any turning point.</p>
     </div>
 
     <div class="fig">
@@ -163,8 +176,8 @@
 <section class="band" id="s-lgd">
   <div class="wrap">
     <div class="band-head">
-      <div class="step ui">Two. Severity</div>
-      <h2>Size and industry predict how much is lost. Collateral does not.</h2>
+      <div class="step ui">Severity</div>
+      <h2>Loan size and industry drive severity. Collateral barely registers.</h2>
       <p>Charge-off as a share of the original loan amount, for loans that defaulted, by size band
         and industry. This is the second term in expected loss, and it runs in the same direction as
         the first: the loans most likely to default are also the ones that lose most when they do.</p>
@@ -172,7 +185,7 @@
 
     <div class="fig">
       <div class="fig-top">
-        <h3>Loss on default, by loan size and industry</h3>
+        <h3>Share of principal lost on default, by loan size and industry (%)</h3>
         <div class="ctl">
           <label class="chk"><input type="checkbox" id="lgd-thin" checked> fade cells resting on under 100 defaults</label>
         </div>
@@ -194,11 +207,10 @@
 <section class="band" id="s-loan">
   <div class="wrap">
     <div class="band-head">
-      <div class="step ui">Three. One borrower</div>
+      <div class="step ui">Pricing one borrower</div>
       <h2>Default risk over the life of the loan</h2>
       <p>Cumulative default for a cohort of 100 identical loans, quarter by quarter, out to ten
-        years. Default risk is not one number, it is a curve, and the curve is what a lender is
-        underwriting. The age effect is estimated every three months and applied on top of five
+        years. Default risk takes the shape of a curve, and that curve is what a lender underwrites. The age effect is estimated every three months and applied on top of five
         borrower coefficients and a regime intercept.</p>
     </div>
 
@@ -241,7 +253,7 @@
 <section class="band" id="s-valid">
   <div class="wrap">
     <div class="band-head">
-      <div class="step ui">Four. Does it work</div>
+      <div class="step ui">Validation</div>
       <h2>Predicted against observed default rates</h2>
       <p>The model was fitted on one sample and tested on a disjoint holdout. Predicted and observed
         monthly default rates are shown by loan age. The observed series is concealed initially, so that
@@ -279,7 +291,7 @@
 <section class="band" id="s-score">
   <div class="wrap">
     <div class="band-head">
-      <div class="step ui">Five. Cost</div>
+      <div class="step ui">Cost of the loan</div>
       <h2>Rate charged against rate required</h2>
       <p>Each profile's observed average rate against the rate needed to cover funding, capital,
         servicing, origination and expected loss. The diagonal is break-even. Everything below it is
@@ -306,12 +318,12 @@
 <section class="band" id="s-guar">
   <div class="wrap">
     <div class="band-head">
-      <div class="step ui">Six. The guarantee</div>
+      <div class="step ui">The guarantee</div>
       <h2>How much guarantee does this borrower need?</h2>
-      <p>The SBA does not lend. It guarantees a share of each loan, absorbing that share of the loss
-        and cutting the capital a lender has to hold. So every profile has a minimum guarantee at
-        which the observed rate covers cost. For 472 of the 764 profiles with 100 or more loans and
-        a recorded rate, that minimum is zero.</p>
+      <p>The SBA guarantees loans rather than making them. It absorbs a fixed share of each loss and
+        cuts the capital a lender has to hold against the rest. Every profile therefore has a minimum
+        guarantee at which the observed rate covers cost. For 472 of the 766 profiles with 100 or
+        more loans and a recorded rate, that minimum is zero.</p>
     </div>
 
     <div class="fig">
@@ -343,7 +355,7 @@
 <section class="band" id="s-limits">
   <div class="wrap">
     <div class="band-head">
-      <div class="step ui">Seven. Limits</div>
+      <div class="step ui">Limits</div>
       <h2>What this cannot tell you</h2>
     </div>
     <div class="limits">
