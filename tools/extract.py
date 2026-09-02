@@ -138,10 +138,27 @@ drivers = {
     'collateral': {'rows': block(3), 'range': r6(num(lp.get(('D', 6))))},
     'size_band': {'rows': block(9), 'range': r6(num(lp.get(('D', 15))))},
 }
-sector_rows = block(18)
-if sector_rows:
-    vals = [x['lgd'] for x in sector_rows if x['lgd'] is not None and x['label'] != 'Grand Total']
-    drivers['sector'] = {'rows': sector_rows, 'range': r6(max(vals) - min(vals)) if vals else None}
+# the sector block opens with an unlabelled row, so scan for named rows
+sector_rows = []
+r = 18
+while r <= n2:
+    lab = lp.get(('A', r))
+    v = num(lp.get(('D', r)))
+    if v is None and lab is None:
+        r += 1
+        if r > 18 + 3:
+            break
+        continue
+    if lab and str(lab).lower().startswith('range'):
+        break
+    if v is not None and lab:
+        sector_rows.append({'label': str(lab), 'lgd': r6(v),
+                            'charge_off': num(lp.get(('B', r))), 'approval': num(lp.get(('C', r)))})
+    r += 1
+named = [x for x in sector_rows if x['label'] != 'Grand Total']
+if named:
+    vals = [x['lgd'] for x in named]
+    drivers['sector'] = {'rows': named, 'range': r6(max(vals) - min(vals))}
 
 write('lgd.json', {'cells': cells, 'drivers': drivers,
                    'fallback': {x['label']: x['lgd'] for x in block(9)}})

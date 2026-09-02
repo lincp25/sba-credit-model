@@ -123,9 +123,9 @@ export function pdAt(p, regime, months) {
 
 /* Loss given default: size|sector, falling back to the size-band average
    when the cell rests on fewer than 100 defaults. */
-export function lgdFor(p) {
+export function lgdFor(p, minDefaults = DEFAULTS.minDefaults) {
   const cell = D.lgdMap.get(`${p.size}|${p.sector}`.toUpperCase());
-  if (cell && cell.defaults >= 100) return { lgd: cell.lgd, thin: false, n: cell.defaults };
+  if (cell && cell.defaults >= minDefaults) return { lgd: cell.lgd, thin: false, n: cell.defaults };
   const fb = D.lgd.fallback[p.size];
   return { lgd: fb, thin: true, n: cell ? cell.defaults : 0 };
 }
@@ -135,6 +135,37 @@ export function guaranteeFor(p) {
   if (r && r[D.ix.guarantee] != null) return r[D.ix.guarantee];
   if (p.subprogram === 'FA$TRK (Small Loan Express)') return 0.5;
   return (p.size === '<50K' || p.size === '50-150K') ? 0.85 : 0.75;
+}
+
+/* ------------------------------------------------------------------
+   ASSUMPTIONS. Every one of these is a choice, not a measurement.
+   DEFAULTS holds the value used in the study; the panel lets a reader
+   move any of them and watch the whole page re-price.
+   ------------------------------------------------------------------ */
+export const DEFAULTS = {
+  fund: 'SBA-weighted',     // bank cost of funds scenario, FDIC 2024
+  capital: 'SBA-weighted',  // capital charge scenario = capital ratio x ROE
+  servicing: 0.01,          // annual cost of servicing a loan
+  origMult: 1,              // multiplier on the per-band origination cost
+  horizon: 5,               // years over which loss is measured and annualised
+  capitalRelief: true,      // guaranteed portion carries a 0% risk weight
+  minLoans: 100,            // loans needed before a profile counts as evidence
+  minDefaults: 100          // defaults needed before an LGD cell is used directly
+};
+
+/* One place where a loan's break-even rate is computed. Every chart on
+   the page calls this, so an assumption change moves all of them. */
+export function requiredRate(r, guarantee, A) {
+  const c = D.costs, ix = D.ix;
+  const avg = r.avgLoan || 150000;
+  const pd = { 1: r[ix.pd12], 3: r[ix.pd36], 5: r[ix.pd60] }[A.horizon];
+  const el = (pd || 0) * (r[ix.lgd] || 0);
+  const capRelief = A.capitalRelief ? (1 - guarantee) : 1;
+  return c.funding[A.fund] * (1 - c.capital_ratio)
+       + (c.origination[r[ix.size]] * A.origMult / avg) / A.horizon
+       + (el / A.horizon) * (1 - guarantee)
+       + c.capital_charge[A.capital] * capRelief
+       + A.servicing;
 }
 
 /* ------------------------------------------------------------------
@@ -151,12 +182,13 @@ export function guaranteeFor(p) {
 export function costStack(p, opts) {
   const c = D.costs;
   const guarantee = opts.guarantee;
+  const A = opts.A || DEFAULTS;
   const avgLoan = opts.avgLoan || 150000;
   const funding = opts.funding * (1 - c.capital_ratio);
-  const origination = (opts.origination / avgLoan) / 5;
-  const el = opts.el5 / 5 * (1 - guarantee);
-  const capital = opts.capitalCharge * (1 - guarantee);
-  const servicing = c.servicing;
+  const origination = (opts.origination / avgLoan) / A.horizon;
+  const el = opts.el5 / A.horizon * (1 - guarantee);
+  const capital = opts.capitalCharge * (A.capitalRelief ? (1 - guarantee) : 1);
+  const servicing = A.servicing;
   const required = funding + origination + el + capital + servicing;
   return {
     funding, origination, expectedLoss: el, capital, servicing, required,

@@ -171,3 +171,27 @@ input[type=range]::-moz-range-thumb{
 .fig input[type=range]::-moz-range-track{background:#E4EAF1}
 .fig input[type=range]::-moz-range-thumb{background:#2B5C93;border-color:#fff}
 .fig .slider{min-width:170px}
+
+/* thesis and section bridges */
+.thesis{
+  font-size:1.06rem;line-height:1.7;font-weight:600;color:var(--ink);
+  border-left:3px solid var(--navy-3);padding:2px 0 2px 18px;margin:20px 0 18px;max-width:62ch;
+}
+.bridge{
+  max-width:58ch;margin:26px auto 6px;padding-left:26px;position:relative;
+  font-size:.94rem;line-height:1.6;color:var(--muted);font-weight:500;
+}
+.bridge::before{
+  content:"";position:absolute;left:0;top:.62em;width:14px;height:14px;
+  border-left:1.5px solid var(--navy-3);border-bottom:1.5px solid var(--navy-3);
+  transform:rotate(-45deg);opacity:.55;
+}
+
+/* assumptions panel */
+.assump-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.reset{background:#24466E;border:1px solid #35608F;color:#CFE0F0;border-radius:99px;
+  padding:3px 11px;font-size:11px;font-weight:600}
+.reset:hover{background:#2E5787}
+.assump .field{margin-bottom:11px}
+.badge{display:inline-block;background:#B5821A;color:#221703;border-radius:99px;
+  font-size:10px;font-weight:700;padding:1px 7px;margin-left:7px;vertical-align:2px}

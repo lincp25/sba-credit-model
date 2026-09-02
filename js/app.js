@@ -16,8 +16,9 @@ const S = {
   era: 'all', seaMode: 'haz', seaGhost: true, seaPool: false, prevEra: null,
   valSet: 'holdout', valHidden: true,
   scThin: true, scUnder: false, scGuar: false,
-  lgdThin: true, driverShown: false,
-  fund: 'SBA-weighted', orig: 3500, policyG: 0
+  lgdThin: true, driverShown: true,
+  policyG: 0,
+  A: { ...M.DEFAULTS }
 };
 
 /* =============================================================== boot */
@@ -35,9 +36,12 @@ function buildRail() {
   fill('#f-prog', M.D.levels.subprogram, S.subprogram);
   $('#f-col').value = String(S.collateral);
   $('#f-reg').value = S.regime;
-  const f = M.D.costs.funding;
-  $('#gs-fund').innerHTML = Object.keys(f)
-    .map(k => `<option value="${k}"${k === S.fund ? ' selected' : ''}>${k} — ${(f[k] * 100).toFixed(2)}%</option>`).join('');
+  const f = M.D.costs.funding, cc = M.D.costs.capital_charge;
+  const opts = (obj, cur) => Object.keys(obj)
+    .map(k => `<option value="${k}"${k === cur ? ' selected' : ''}>${k} — ${(obj[k] * 100).toFixed(2)}%</option>`).join('');
+  $('#a-fund').innerHTML = opts(f, S.A.fund);
+  $('#a-cap').innerHTML  = opts(cc, S.A.capital);
+  syncAssumptions();
 }
 function fill(sel, vals, cur) {
   $(sel).innerHTML = vals.map(v => `<option${v === cur ? ' selected' : ''}>${v}</option>`).join('');
@@ -83,17 +87,23 @@ function wire() {
   toggle('#sc-under', 'scUnder', renderScatter);
   $('#sc-guar').addEventListener('change', e => { S.scGuar = e.target.checked; renderScatter(); });
   $('#lgd-thin').addEventListener('change', e => { S.lgdThin = e.target.checked; renderLGD(); });
-  $('#btn-driver').addEventListener('click', e => {
-    S.driverShown = !S.driverShown;
-    e.target.classList.toggle('on', !S.driverShown);
-    e.target.textContent = S.driverShown ? 'Hide' : 'Show me';
-    renderDriver();
-  });
+  
 
-  $('#gs-fund').addEventListener('change', e => { S.fund = e.target.value; renderStack(); renderPolicy(); });
-  $('#gs-orig').addEventListener('input', e => {
-    S.orig = +e.target.value; $('#o-orig').textContent = M.fmtUSD(S.orig);
-    renderStack(); renderPolicy();
+    const setA = (k, v) => { S.A[k] = v; syncAssumptions(); renderAll(); };
+  $('#a-fund').addEventListener('change', e => setA('fund', e.target.value));
+  $('#a-cap').addEventListener('change',  e => setA('capital', e.target.value));
+  $('#a-hor').addEventListener('change',  e => setA('horizon', +e.target.value));
+  $('#a-relief').addEventListener('change', e => setA('capitalRelief', e.target.value === '1'));
+  $('#a-serv').addEventListener('input', e => setA('servicing', +e.target.value / 100));
+  $('#a-orig').addEventListener('input', e => setA('origMult', +e.target.value));
+  $('#a-min').addEventListener('input',  e => setA('minLoans', +e.target.value));
+  $('#a-reset').addEventListener('click', () => {
+    S.A = { ...M.DEFAULTS };
+    $('#a-fund').value = S.A.fund; $('#a-cap').value = S.A.capital;
+    $('#a-hor').value = S.A.horizon; $('#a-relief').value = '1';
+    $('#a-serv').value = S.A.servicing * 100; $('#a-orig').value = S.A.origMult;
+    $('#a-min').value = S.A.minLoans;
+    syncAssumptions(); renderAll();
   });
   $('#gp-g').addEventListener('input', e => {
     S.policyG = +e.target.value; $('#o-gp').textContent = S.policyG + '%'; renderPolicy();
@@ -114,7 +124,7 @@ function renderAll() {
   $('#macro-note').textContent = '';
   renderRail(); renderSurvival(); renderWaterfall(); renderSwaps();
   renderSeason(); renderValid(); renderErrors(); renderScatter();
-  renderLGD(); renderDriver(); renderStack(); renderPolicy(); renderLimits();
+  renderLGD(); renderDriver(); renderStack(); renderPolicy(); renderSplit(); renderLimits();
 }
 
 /* =============================================================== rail */
@@ -141,7 +151,7 @@ function renderRail() {
   const w = [];
   if (!r || r[M.D.ix.loans] === 0)
     w.push('This combination does not occur in the SBA record. The model will price it, but no observations support the result.');
-  else if (r[M.D.ix.loans] < 100)
+  else if (r[M.D.ix.loans] < S.A.minLoans)
     w.push(`${r[M.D.ix.loans]} loans match this profile. Below 100, figures are indicative only.`);
   if (lg.thin)
     w.push(`Severity for ${S.size} in ${S.sector} rests on ${lg.n} defaults; the ${S.size} band average is used instead.`);
@@ -271,7 +281,7 @@ function renderSwaps() {
   const p = profile();
   const base = M.pdAt(p, S.regime, 60);
   if (base == null) { host.innerHTML = '<p class="note">Not available for this profile.</p>'; return; }
-  const baseEL = base * M.lgdFor(p).lgd;
+  const baseEL = base * M.lgdFor(p, S.A.minDefaults).lgd;
   const sw = M.singleSwaps(p, S.regime);
   const best = sw.slice(0, 4), worst = sw.slice(-2).reverse();
   const label = { businesstype: 'Become', sector: 'Move into', subprogram: 'Borrow under', size: 'Borrow', collateral: 'Pledge' };
@@ -584,21 +594,14 @@ function renderErrors() {
 
 /* =========================================================== scatter */
 function requiredRate(r, useGuarantee) {
-  const ix = M.D.ix, c = M.D.costs;
-  const g = useGuarantee ? (r[ix.guarantee] ?? .75) : 0;
-  const avg = r.avgLoan || 150000;
-  return c.funding[S.fund] * (1 - c.capital_ratio)
-    + (c.origination[r[ix.size]] / avg) / 5
-    + (r.el5 / 5) * (1 - g)
-    + c.capital_charge['SBA-weighted'] * (1 - g)
-    + c.servicing;
+  return M.requiredRate(r, useGuarantee ? (r[M.D.ix.guarantee] ?? .75) : 0, S.A);
 }
 
 function renderScatter() {
   const host = $('#fig-scatter'); C.clear(host);
   const ix = M.D.ix;
   const rows = M.D.scorecard.rows.filter(r =>
-    r[ix.rate] != null && (!S.scThin || r[ix.loans] >= 100));
+    r[ix.rate] != null && (!S.scThin || r[ix.loans] >= S.A.minLoans));
   const W = 700, H = 430, m = { t: 16, r: 20, b: 48, l: 66 };
   const s = C.svg(W, H);
   const lim = .16;
@@ -658,7 +661,7 @@ function renderLGD() {
   const sectors = [...new Set(cells.map(c => c.sector))];
   const avg = {};
   sectors.forEach(sec => {
-    const rs = cells.filter(c => c.sector === sec && c.defaults >= 100);
+    const rs = cells.filter(c => c.sector === sec && c.defaults >= S.A.minDefaults);
     avg[sec] = rs.length ? rs.reduce((a, c) => a + c.charge_off, 0) / rs.reduce((a, c) => a + c.approval, 0) : 0;
   });
   sectors.sort((a, b) => avg[b] - avg[a]);
@@ -679,7 +682,7 @@ function renderLGD() {
     M.BANDS.forEach((b, i) => {
       const c = cells.find(z => z.sector === sec && z.size === b);
       const g = C.el('g');
-      const thin = !c || c.defaults < 100;
+      const thin = !c || c.defaults < S.A.minDefaults;
       const v = c ? c.lgd : null;
       const rect = C.el('rect', {
         x: m.l + i * cw + 1.5, y: yy + 2, width: cw - 3, height: ch - 4, rx: 5,
@@ -723,12 +726,7 @@ function renderLGD() {
 
 function renderDriver() {
   const host = $('#fig-driver'); C.clear(host);
-  if (!S.driverShown) {
-    host.innerHTML = `<p class="note" style="margin:0">Collateral, loan size and industry were each
-      tested separately against realised charge-offs across the full loan record.</p>`;
-    $('#cap-driver').textContent = '';
-    return;
-  }
+  
   const d = M.D.lgd.drivers;
   const items = [['Collateral pledged', d.collateral], ['Industry', d.sector], ['Loan size', d.size_band]]
     .filter(x => x[1] && x[1].range != null);
@@ -745,13 +743,14 @@ function renderDriver() {
     }));
     s.appendChild(C.el('text', {
       x: Math.max(x(dd.range), m.l + 4) + 8, y: yy + 21, class: 'serieslab', fill: COL.muted || '#5B6C77'
-    }, (dd.range * 100).toFixed(dd.range < .01 ? 2 : 1) + ' pts'));
+    }, (dd.range * 100).toFixed(dd.range < .01 ? 3 : 1) + ' pts'));
   });
   s.appendChild(C.el('text', { x: m.l, y: H - 4, class: 'axlab' }, 'spread between best and worst category, in percentage points of loss severity'));
   host.appendChild(s);
   $('#cap-driver').innerHTML =
-    `<b>Collateral moves loss severity by ${(d.collateral.range * 100).toFixed(2)} percentage points;
-     loan size moves it by ${(d.size_band.range * 100).toFixed(1)}.</b> Secured loans lose
+    `<b>Collateral moves loss severity by ${(d.collateral.range * 100).toFixed(3)} percentage points.
+     Industry moves it by ${(d.sector.range * 100).toFixed(1)} and loan size by
+     ${(d.size_band.range * 100).toFixed(1)}.</b> Secured loans lose
      ${(d.collateral.rows.find(r => /true/i.test(r.label))?.lgd * 100).toFixed(1)}% of principal on
      default against ${(d.collateral.rows.find(r => /false/i.test(r.label))?.lgd * 100).toFixed(1)}%
      for unsecured. That gap is small enough to be noise, which is awkward, because collateral is
@@ -766,12 +765,14 @@ function renderStack() {
   const p = profile(), r = M.row(p), ix = M.D.ix;
   const pd60 = M.pdAt(p, S.regime, 60);
   if (pd60 == null || !r) { host.innerHTML = '<p class="note">No priced record for this profile.</p>'; $('#cap-stack').textContent = ''; return; }
-  const el5 = pd60 * M.lgdFor(p).lgd;
+  const pdH = M.pdAt(p, S.regime, S.A.horizon * 12);
+  const el5 = (pdH == null ? pd60 : pdH) * M.lgdFor(p, S.A.minDefaults).lgd;
   const rate = r[ix.rate];
   const opts = {
-    funding: M.D.costs.funding[S.fund], origination: S.orig, el5,
-    capitalCharge: M.D.costs.capital_charge['SBA-weighted'],
-    avgLoan: r.avgLoan, rate
+    funding: M.D.costs.funding[S.A.fund],
+    origination: M.D.costs.origination[S.size] * S.A.origMult,
+    el5, capitalCharge: M.D.costs.capital_charge[S.A.capital],
+    avgLoan: r.avgLoan, rate, A: S.A
   };
   const g = M.guaranteeFor(p);
   const withG = M.costStack(p, { ...opts, guarantee: g });
@@ -838,17 +839,13 @@ function renderStack() {
 function renderPolicy() {
   const host = $('#fig-policy'); C.clear(host);
   const ix = M.D.ix, c = M.D.costs;
-  const rows = M.D.scorecard.rows.filter(r => r[ix.rate] != null && r[ix.loans] >= 100);
+  const rows = M.D.scorecard.rows.filter(r => r[ix.rate] != null && r[ix.loans] >= S.A.minLoans);
   const curve = [];
   for (let gi = 0; gi <= 90; gi += 5) {
     const g = gi / 100;
     let n = 0, dollars = 0;
     rows.forEach(r => {
-      const avg = r.avgLoan || 150000;
-      const req = c.funding[S.fund] * (1 - c.capital_ratio)
-        + (c.origination[r[ix.size]] / avg) / 5
-        + (r.el5 / 5) * (1 - g) + c.capital_charge['SBA-weighted'] * (1 - g) + c.servicing;
-      if (r[ix.rate] > req) { n++; dollars += r[ix.dollars]; }
+      if (r[ix.rate] > M.requiredRate(r, g, S.A)) { n++; dollars += r[ix.dollars]; }
     });
     curve.push({ g: gi, n, dollars });
   }
@@ -894,4 +891,59 @@ function renderLimits() {
   $$('.limits li').forEach(li => li.classList.remove('live'));
   if (!hasRate) $('#lim-rate').classList.add('live');
   if (S.size === '<50K') $('#lim-bal').classList.add('live');
+}
+
+
+/* ====================================================== three-way split */
+function renderSplit() {
+  const host = $('#fig-split'); if (!host) return;
+  const ix = M.D.ix, c = M.D.costs;
+  const rows = M.D.scorecard.rows.filter(r => r[ix.rate] != null && r[ix.loans] >= S.A.minLoans);
+  const req = (r, g) => M.requiredRate(r, g, S.A);
+  const gOf = r => r[ix.guarantee] ?? .75;
+  const alone = rows.filter(r => r[ix.rate] > req(r, 0));
+  const needs = rows.filter(r => r[ix.rate] <= req(r, 0) && r[ix.rate] > req(r, gOf(r)));
+  const never = rows.filter(r => r[ix.rate] <= req(r, gOf(r)));
+  const D = a => a.reduce((x, r) => x + r[ix.dollars], 0);
+  const L = a => a.reduce((x, r) => x + r[ix.loans], 0);
+  const tD = D(rows), tL = L(rows);
+  const line = (label, a, cls) => `<tr>
+      <td><span class="pill ${cls}">${label}</span></td>
+      <td style="text-align:right"><b>${a.length}</b></td>
+      <td style="text-align:right">${(100 * L(a) / tL).toFixed(1)}%</td>
+      <td style="text-align:right">${(100 * D(a) / tD).toFixed(1)}%</td></tr>`;
+  host.innerHTML = `
+    <table>
+      <tr><th>Of ${M.fmtNum(rows.length)} priceable profiles</th>
+          <th style="text-align:right">Profiles</th>
+          <th style="text-align:right">Share of loans</th>
+          <th style="text-align:right">Share of dollars</th></tr>
+      ${line('Clear unaided', alone, 'ok')}
+      ${line('Need the guarantee', needs, 'thin')}
+      ${line('Never clear', never, 'no')}
+    </table>
+    <p class="figcap">This is the finding the rest of the page builds toward.
+      <b>${needs.length} profiles clear only because the guarantee exists.</b> They are
+      ${(100 * L(needs) / tL).toFixed(0)}% of all loans and ${(100 * D(needs) / tD).toFixed(1)}% of
+      all dollars. The guarantee is not subsidising volume. It is reaching a large number of very
+      small borrowers, and ${needs.filter(r => r[ix.size] === '<50K' || r[ix.size] === '50-150K').length}
+      of the ${needs.length} are loans under $150,000. A further ${never.length} profiles do not clear
+      even at their full guarantee.</p>`;
+}
+
+
+/* Keep the panel's readouts in step, and show when anything is off default. */
+function syncAssumptions() {
+  const A = S.A, o = M.DEFAULTS;
+  $('#o-serv').textContent = (A.servicing * 100).toFixed(1) + '%';
+  $('#o-orig').textContent = '\u00d7' + A.origMult;
+  $('#o-min').textContent = A.minLoans;
+  const bands = M.BANDS.map(b => M.fmtUSD(M.D.costs.origination[b] * A.origMult));
+  $('#a-orig-note').textContent =
+    `${bands[0]} on loans under $350K, ${bands[3]} on $350K\u20131M, ${bands[4]} above.`;
+  const changed = Object.keys(o).filter(k => A[k] !== o[k]);
+  $('#a-reset').hidden = changed.length === 0;
+  const h = document.querySelector('.assump-head h4');
+  h.innerHTML = 'Assumptions' + (changed.length
+    ? `<span class="badge">${changed.length} changed</span>` : '');
 }
