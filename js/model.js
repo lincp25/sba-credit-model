@@ -1,5 +1,5 @@
 /* ------------------------------------------------------------------
-   model.js — the credit model, ported from the workbook.
+   model.js: the credit model, ported from the workbook.
 
    PD is a discrete-time hazard model. The workbook stores an age
    effect every 3 months and a coefficient per borrower attribute.
@@ -236,9 +236,9 @@ export function singleSwaps(p, regime) {
   return out.sort((a, b) => a.delta - b.delta);
 }
 
-export const fmtPct = (x, d = 2) => x == null || !isFinite(x) ? '—' : (x * 100).toFixed(d) + '%';
-export const fmtNum = n => n == null ? '—' : n.toLocaleString('en-US');
-export const fmtUSD = n => n == null ? '—' : '$' + Math.round(n).toLocaleString('en-US');
+export const fmtPct = (x, d = 2) => x == null || !isFinite(x) ? 'n/a' : (x * 100).toFixed(d) + '%';
+export const fmtNum = n => n == null ? 'n/a' : n.toLocaleString('en-US');
+export const fmtUSD = n => n == null ? 'n/a' : '$' + Math.round(n).toLocaleString('en-US');
 export const ordinal = n => {
   const s = ['th', 'st', 'nd', 'rd'], v = n % 100;
   return n + (s[(v - 20) % 10] || s[v] || s[0]);

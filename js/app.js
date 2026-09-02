@@ -38,7 +38,7 @@ function buildRail() {
   $('#f-reg').value = S.regime;
   const f = M.D.costs.funding, cc = M.D.costs.capital_charge;
   const opts = (obj, cur) => Object.keys(obj)
-    .map(k => `<option value="${k}"${k === cur ? ' selected' : ''}>${k} — ${(obj[k] * 100).toFixed(2)}%</option>`).join('');
+    .map(k => `<option value="${k}"${k === cur ? ' selected' : ''}>${k}, ${(obj[k] * 100).toFixed(2)}%</option>`).join('');
   $('#a-fund').innerHTML = opts(f, S.A.fund);
   $('#a-cap').innerHTML  = opts(cc, S.A.capital);
   syncAssumptions();
@@ -144,9 +144,9 @@ function renderRail() {
   $('#r-pd36').textContent = M.fmtPct(pd(36), 1);
   $('#r-pd60').textContent = M.fmtPct(pd60, 1);
   $('#r-lgd').textContent = M.fmtPct(lg.lgd, 0);
-  $('#r-rank').textContent = el == null ? '—' : M.ordinal(Math.round(M.percentileOfEL(el) * 100)) + ' pct';
+  $('#r-rank').textContent = el == null ? 'n/a' : M.ordinal(Math.round(M.percentileOfEL(el) * 100)) + ' pct';
   $('#r-n').textContent = r ? M.fmtNum(r[M.D.ix.loans]) : '0';
-  $('#r-avg').textContent = r && r.avgLoan ? M.fmtUSD(r.avgLoan) : '—';
+  $('#r-avg').textContent = r && r.avgLoan ? M.fmtUSD(r.avgLoan) : 'n/a';
 
   const w = [];
   if (!r || r[M.D.ix.loans] === 0)
@@ -291,7 +291,7 @@ function renderSwaps() {
       <td style="text-align:right;color:var(--muted)">${(s.el * 100).toFixed(1)}%</td></tr>`;
   host.innerHTML = `<table>
     <tr><th>Attribute changed</th><th style="text-align:right">Effect</th><th style="text-align:right">New loss</th></tr>
-    <tr class="hi"><td>Selected profile</td><td style="text-align:right">—</td>
+    <tr class="hi"><td>Selected profile</td><td style="text-align:right">base</td>
         <td style="text-align:right"><b>${(baseEL * 100).toFixed(1)}%</b></td></tr>
     ${best.map(line).join('')}
     <tr><td colspan="3" style="border:0;height:8px"></td></tr>
@@ -419,8 +419,8 @@ function renderSeason() {
   // figures for the vintages actually on screen, not always the whole book
   const small = cur.find(g => g.band === '<50K'), big = cur.find(g => g.band === '1M+');
   const at = (g, mo) => { const p = g && g.pts.find(v => v.month === mo); return p ? p.cum : null; };
-  const eraName = { all: 'every vintage in the book', pre_crisis: 'loans made in 2000&ndash;2004',
-    cohort_2005_12: 'loans made in 2005&ndash;2012', post_crisis: 'loans made in 2013&ndash;2016' }[S.era];
+  const eraName = { all: 'every vintage in the book', pre_crisis: 'loans made between 2000 and 2004',
+    cohort_2005_12: 'loans made between 2005 and 2012', post_crisis: 'loans made between 2013 and 2016' }[S.era];
   const gap = at(small, 60) != null && at(big, 60) != null
     ? `<b>By year five, ${(at(small, 60) * 100).toFixed(1)}% of the sub-$50K loans have defaulted
        against ${(at(big, 60) * 100).toFixed(1)}% of those over $1M</b>, a gap of
@@ -450,9 +450,9 @@ function renderSeason() {
        ${(lrg.month / 12).toFixed(0)}.` : '';
   $('#cap-season').innerHTML =
     `Showing ${eraName}. ${gap} ${turn} Vintage matters as much as size: the same sub-$50K band runs
-     ${(vintage[0] * 100).toFixed(1)}% over five years for the 2000&ndash;2004 loans,
-     ${(vintage[1] * 100).toFixed(1)}% for 2005&ndash;2012 and ${(vintage[2] * 100).toFixed(1)}% for
-     2013&ndash;2016, which is why the model carries separate coefficients for benign, average and
+     ${(vintage[0] * 100).toFixed(1)}% over five years for loans made between 2000 and 2004,
+     ${(vintage[1] * 100).toFixed(1)}% for 2005 to 2012 and ${(vintage[2] * 100).toFixed(1)}% for
+     2013 to 2016, which is why the model carries separate coefficients for benign, average and
      crisis conditions rather than one. All months in the record are drawn, to
      ${(lastMonth / 12).toFixed(0)} years for these vintages. Each series fades where fewer than
      5,000 loans in that band remain at risk. Monthly rates are shown as a centred seven-month mean;
@@ -953,7 +953,7 @@ function syncAssumptions() {
   $('#o-min').textContent = A.minLoans;
   const bands = M.BANDS.map(b => M.fmtUSD(M.D.costs.origination[b] * A.origMult));
   $('#a-orig-note').textContent =
-    `${bands[0]} on loans under $350K, ${bands[3]} on $350K\u20131M, ${bands[4]} above.`;
+    `${bands[0]} on loans under $350K, ${bands[3]} from $350K to $1M, ${bands[4]} above.`;
   const changed = Object.keys(o).filter(k => A[k] !== o[k]);
   $('#a-reset').hidden = changed.length === 0;
   const h = document.querySelector('.assump-head h4');

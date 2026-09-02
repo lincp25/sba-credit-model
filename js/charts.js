@@ -1,4 +1,4 @@
-/* charts.js — minimal SVG drawing helpers. No dependencies, so the
+/* charts.js: minimal SVG drawing helpers. No dependencies, so the
    site works from a file:// path or GitHub Pages with nothing else. */
 
 const NS = 'http://www.w3.org/2000/svg';

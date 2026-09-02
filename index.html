@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>What does a small business loan cost a bank? — an expected loss model on 1.4m SBA loans</title>
+<title>What does a small business loan cost a bank? An expected loss model on 1.4m SBA loans</title>
 <meta name="description" content="An interactive expected loss model built on 1,391,586 SBA 7(a) loans, FY2000 to FY2026. Pick a borrower and watch the model price them.">
 <link rel="stylesheet" href="css/style.css">
 </head>
@@ -13,14 +13,13 @@
 <!-- ==================================================== borrower rail -->
 <aside class="rail" aria-label="Model controls">
   <div class="rail-mark">SBA 7(a) expected loss model
-    <span>Two sets of controls. The first describes one borrower. The second sets what a loan costs
-      a bank to make.</span>
+    <span>The controls below describe a single borrower and the cost of lending to that borrower.</span>
   </div>
 
   <div class="group">
     <div class="group-tag">1 &middot; The borrower</div>
-    <p class="group-note">Who is borrowing. Drives the loss on this one loan, and every figure on
-      the page recalculates for it.</p>
+    <p class="group-note">These settings describe a single borrower. Default probability and loss
+      severity are calculated for that profile, and every figure on the page follows it.</p>
   </div>
 <div class="fields">
     <div class="field"><label for="f-size">Loan size</label><select id="f-size"></select></div>
@@ -50,25 +49,25 @@
   </div>
 
   <div class="readout">
-    <div class="big" id="r-el">—</div>
+    <div class="big" id="r-el">n/a</div>
     <div class="cap">Expected loss on every dollar lent to this borrower, over five years</div>
   </div>
   <div class="readout">
-    <div class="kv"><span>Defaults within 1 year</span><span id="r-pd12">—</span></div>
-    <div class="kv"><span>Defaults within 3 years</span><span id="r-pd36">—</span></div>
-    <div class="kv"><span>Defaults within 5 years</span><span id="r-pd60">—</span></div>
-    <div class="kv"><span>Lost if it defaults</span><span id="r-lgd">—</span></div>
-    <div class="kv"><span>Riskier than</span><span id="r-rank">—</span></div>
-    <div class="kv"><span>Loans behind this</span><span id="r-n">—</span></div>
-    <div class="kv"><span>Average loan</span><span id="r-avg">—</span></div>
+    <div class="kv"><span>Defaults within 1 year</span><span id="r-pd12">n/a</span></div>
+    <div class="kv"><span>Defaults within 3 years</span><span id="r-pd36">n/a</span></div>
+    <div class="kv"><span>Defaults within 5 years</span><span id="r-pd60">n/a</span></div>
+    <div class="kv"><span>Lost if it defaults</span><span id="r-lgd">n/a</span></div>
+    <div class="kv"><span>Riskier than</span><span id="r-rank">n/a</span></div>
+    <div class="kv"><span>Loans behind this</span><span id="r-n">n/a</span></div>
+    <div class="kv"><span>Average loan</span><span id="r-avg">n/a</span></div>
   </div>
   <div id="r-warn"></div>
 
   <div class="group group-b">
     <div class="group-tag">2 &middot; Cost assumptions</div>
-    <p class="group-note">What the loan costs the bank. Drives what a loan must earn to break even,
-      and therefore how many profiles clear it. Leaves default rates and loss severity untouched,
-      since those are measured from the loan record.</p>
+    <p class="group-note">These settings describe what a loan costs a bank to make. They determine the
+      rate it must earn to break even, and therefore how many profiles clear that threshold. Default
+      probability and loss severity are measured from the loan record and do not respond to them.</p>
   </div>
 <hr>
   <div class="assump">
@@ -118,24 +117,45 @@
 <section class="hero">
   <div class="wrap">
     <h1>An expected loss model for SBA 7(a) small business loans</h1>
-    <p class="lead">A bank has to price a loan before it knows how the loan turns out. What it has
-      to go on is the record of the loans that came before.</p>
-    <p class="lead">Here that record runs to 1,391,586 SBA-guaranteed loans approved between 2000 and
-      2026. How often a borrower defaults is estimated from a hazard model fitted to loan age,
-      carrying separate coefficients for benign, average and crisis conditions. How much is lost when
-      one does is measured from realised charge-offs. Together they give an expected loss for each of
-      5,040 kinds of borrower. What remains is to weigh that against the rates lenders charged, and
-      against what the loan costs a bank to make.</p>
-    <p class="thesis">Most SBA lending would happen without the government. Of the profiles this
-      model can price, 472 cover their own cost unaided. The programme's real work sits in a narrow
-      band underneath: a further 237 profiles clear only because the guarantee is there, and they are
-      a third of all loans but barely 5% of the dollars. Its effect falls on a large number of very
-      small borrowers rather than on the volume of lending.</p>
+    <p class="lead">SBA 7(a) loans are generally regarded as risky lending, and in aggregate the
+      record bears this out. About 12% of loans default within five years, and a defaulted loan loses
+      roughly 64% of its principal. The averages conceal a very wide spread. Loans under $50,000
+      default at 19.5% over five years while loans above $1M default at 1.7%, and severity falls from
+      83% to 57% across the same range. The programme therefore contains both marginal credit and
+      lending a bank would compete for.</p>
+
+    <p class="lead">This model makes the spread visible at the level of an individual borrower rather
+      than the book as a whole. Drawing on 1,391,586 loans approved between 2000 and 2026, the
+      probability of default is modelled as a discrete-time hazard fitted to loan age, with separate
+      coefficients for benign, average and crisis conditions, while the share of principal lost once
+      a default occurs is measured directly from realised charge-offs. The two combine into an
+      expected loss for each of 5,040 borrower profiles.</p>
+
+    <p class="lead">Lending at these loss rates requires protection, and the 7(a) programme is
+      structured to provide it. The SBA does not itself lend. Private lenders originate and hold the
+      loan, the SBA guarantees 75 to 85% of principal against loss, and the lender pays a fee for the
+      guarantee and may sell the guaranteed portion into a secondary market. About half of loans are
+      also secured against collateral. The model treats the guarantee and the collateral separately,
+      since the record assigns them different roles. A guarantee reduces both the loss a lender bears and the capital it must hold,
+      so it belongs on the cost side of the calculation. Collateral carries real information about
+      whether a borrower defaults but almost none about how much is lost when one does, so it enters
+      the default probability and is kept out of severity.</p>
+
+    <p class="lead">Setting the resulting expected loss against the rates lenders actually charged,
+      and against what a loan costs a bank to originate and hold, separates the borrowers a bank can
+      serve on commercial terms from the borrowers whose access depends on the guarantee.</p>
+
+    <p class="thesis">The model suggests most SBA lending clears on commercial terms. At the rates
+      lenders actually charged, 472 of 766 borrower profiles cover their full cost of capital with no
+      guarantee applied, and those profiles carry 95% of the dollars lent. A further 237 cover cost
+      only once the guarantee absorbs its share of the loss. Those 237 are a third of all loans and
+      5% of the dollars, so on this evidence the guarantee's marginal effect falls on the number of
+      small businesses financed rather than on the volume of lending.</p>
     <p class="lead">Selecting a profile in the panel on the left recalculates every figure below
-      for that borrower.</p>
+      for the borrower chosen.</p>
 
     <div class="stats">
-      <div class="stat"><b class="tnum">1,391,586</b><span>loans, FY2000&ndash;FY2026</span></div>
+      <div class="stat"><b class="tnum">1,391,586</b><span>loans, FY2000 to FY2026</span></div>
       <div class="stat"><b class="tnum">5,040</b><span>borrower profiles modelled</span></div>
       <div class="stat"><b class="tnum">0.957</b><span>out-of-sample R&sup2;, first ten years</span></div>
       <div class="stat"><b class="tnum">237</b><span>profiles that need the guarantee</span></div>
@@ -152,8 +172,8 @@
       <p>Life-table default rates straight from the loan record, with no model applied. The
         conventional expectation is that a loan is riskiest when new and then seasons out. These
         loans do season out, but not for seven to ten years, and larger loans turn later than small
-        ones. Each vintage window covers a different span, from 26 years for the 2000&ndash;2004
-        cohort down to 13 for 2013&ndash;2016.</p>
+        ones. Each vintage window covers a different span, from 26 years for the 2000 to 2004
+        cohort down to 13 for 2013 to 2016.</p>
       <p class="note">Charge-offs are recorded with an administrative lag, so observed peaks sit
         later than the underlying defaults occurred. Read the shape of these curves rather than the
         precise month of any turning point.</p>
@@ -166,9 +186,9 @@
           <span class="lbl">Vintages</span>
           <div class="seg" id="sea-era">
             <button data-v="all" aria-pressed="true">All</button>
-            <button data-v="pre_crisis" aria-pressed="false">2000&ndash;04</button>
-            <button data-v="cohort_2005_12" aria-pressed="false">2005&ndash;12</button>
-            <button data-v="post_crisis" aria-pressed="false">2013&ndash;16</button>
+            <button data-v="pre_crisis" aria-pressed="false">2000 to 04</button>
+            <button data-v="cohort_2005_12" aria-pressed="false">2005 to 12</button>
+            <button data-v="post_crisis" aria-pressed="false">2013 to 16</button>
           </div>
           <div class="seg" id="sea-mode">
             <button data-v="haz" aria-pressed="true">Monthly rate</button>
@@ -248,7 +268,7 @@
         <div class="fig-top"><h3>Contribution of each borrower attribute</h3></div>
         <div id="fig-water"></div>
         <p class="figcap">Each coefficient expressed as a multiplier on the odds of default, relative
-          to the reference profile: corporation, accommodation and food, $150&ndash;350K, Community
+          to the reference profile: corporation, accommodation and food, $150,000 to $350,000, Community
           Express, unsecured. Bars show the odds ratio, not expected loss.</p>
       </div>
       <div class="fig">
@@ -380,28 +400,41 @@
         <li id="lim-bal">Loss is measured against the original loan amount rather than the balance
           outstanding at default, overstating severity on long-seasoned loans.</li>
         <li id="lim-rej">The data covers approved loans only, with nothing on applicants who were
-          declined. That is the population an access-to-capital argument most needs.</li>
+          declined, which is the population an access-to-capital argument most needs.</li>
+        <li id="lim-fee">The cost stack charges no guaranty fee. A lender pays the SBA an upfront fee
+          on the guaranteed portion and an ongoing servicing fee, together worth roughly 0.4 to 1.0
+          percentage points a year depending on loan size and vintage. Applying a fee at the upper end
+          of that range would move about 75 of the 237 profiles into the group clearing under neither
+          condition, leaving roughly 162 dependent on the guarantee and 132 clearing under neither.
+          The 472 clearing without a guarantee are unaffected, since the fee applies only where the
+          guarantee is used.</li>
+        <li id="lim-cf">Rates in this record were charged in a market where the guarantee already
+          existed. The comparison shows which loans cover cost at the observed rates, and does not
+          establish what lenders would charge or approve in its absence.</li>
       </ul>
     </div>
     <h3 style="margin-top:26px">The assumptions, and what they are worth</h3>
-    <p class="note" style="max-width:66ch;margin-top:8px">Eight numbers in this study are choices
-      rather than measurements. All eight are in the panel on the left at the values used here, and
-      moving any of them re-prices every figure on the page. What follows is what each one does to
+    <p class="note" style="max-width:66ch;margin-top:8px">Nine numbers in this study are choices
+      rather than measurements. Eight are in the panel on the left at the values used here, and moving
+      any of them re-prices every figure on the page; the ninth, the SBA guaranty fee, is not modelled
+      at all. What follows is what each one does to
       the headline split of 472 profiles clearing unaided, 237 needing the guarantee and 57 never
       clearing.</p>
     <table style="margin-top:14px;max-width:820px">
       <tr><th>Assumption</th><th>Used here</th><th>Why</th><th style="text-align:right">Moves the split to</th></tr>
       <tr><td>Bank cost of funds</td><td>2.41%</td><td>FDIC 2024, weighted to SBA lenders</td><td style="text-align:right">619 / 129 / 18 at 0.95%</td></tr>
-      <tr><td>Capital charge</td><td>1.05%</td><td>capital ratio &times; realised return on equity</td><td style="text-align:right">—</td></tr>
+      <tr><td>Capital charge</td><td>1.05%</td><td>capital ratio &times; realised return on equity</td><td style="text-align:right">no effect</td></tr>
       <tr><td>Servicing cost</td><td>1.00% a year</td><td>industry convention, not measured here</td><td style="text-align:right">65 / 311 / 390 at 3%</td></tr>
       <tr><td>Origination cost</td><td>$3,500 to $15,000</td><td>scales with loan size</td><td style="text-align:right">307 / 217 / 242 at &times;3</td></tr>
       <tr><td>Loss horizon</td><td>5 years, annualised</td><td>losses are in fact back-loaded</td><td style="text-align:right">482 / 115 / 169 at 3 years</td></tr>
       <tr><td>Capital on the guarantee</td><td>none</td><td>a government guarantee is a 0% risk weight</td><td style="text-align:right">472 / 167 / 127 if charged</td></tr>
       <tr><td>Loans needed to count</td><td>100</td><td>below this a profile is not evidence</td><td style="text-align:right">1150 / 856 / 157 with no filter</td></tr>
-      <tr><td>Macro coefficients</td><td>fixed constants</td><td>typed into the workbook, not estimated</td><td style="text-align:right">—</td></tr>
+      <tr><td>Macro coefficients</td><td>fixed constants</td><td>typed into the workbook, not estimated</td><td style="text-align:right">no effect</td></tr>
+      <tr><td>SBA guaranty fee</td><td>none charged</td><td>not modelled; borne by the lender in practice</td><td style="text-align:right">472 / 162 / 132 at 3% + 0.55%</td></tr>
     </table>
     <p class="note" style="max-width:66ch;margin-top:14px">The split is most sensitive to servicing
-      cost and to the loan-count filter, and least sensitive to the capital charge. Nothing in the
+      cost and to the loan-count filter, and least sensitive to the capital charge. The guaranty fee is an
+      omission rather than a choice of level, and it bears only on the guaranteed case. Nothing in the
       panel changes the probability of default or the loss severity: those are measured from the
       loan record and do not move.</p>
   </div>
