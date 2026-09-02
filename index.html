@@ -13,7 +13,7 @@
 <!-- ==================================================== borrower rail -->
 <aside class="rail" aria-label="Borrower controls">
   <div class="rail-mark">The borrower
-    <span>Every figure on this page is computed for this profile.</span>
+    <span>All figures on this page are computed for the profile specified below.</span>
   </div>
   <hr>
 
@@ -50,8 +50,8 @@
       <h4 style="margin:0">Assumptions</h4>
       <button class="reset" id="a-reset" hidden>Reset</button>
     </div>
-    <p class="note" style="color:#7E98B4;font-size:11px;margin:0 0 12px">Defaults are the values
-      used in the study. Change any of them and every figure re-prices.</p>
+    <p class="note" style="color:#7E98B4;font-size:11px;margin:0 0 12px">Values shown are those
+      used in the study. Altering any of them re-prices every figure on the page.</p>
 
     <div class="field"><label for="a-fund">Bank cost of funds</label><select id="a-fund"></select></div>
     <div class="field"><label for="a-cap">Capital charge</label><select id="a-cap"></select></div>
@@ -106,8 +106,8 @@
       band underneath: a further 237 profiles clear only because the guarantee is there, and they are
       a third of all loans but barely 5% of the dollars. The guarantee is not subsidising volume. It
       is reaching a large number of very small borrowers.</p>
-    <p class="lead">What follows builds that case in six steps. Set a profile in the panel on the
-      left and every figure recalculates for it.</p>
+    <p class="lead">The case is set out in six sections. Selecting a profile in the panel on the
+      left recalculates every figure for that borrower.</p>
 
     <div class="stats">
       <div class="stat"><b class="tnum">1,391,586</b><span>loans, FY2000&ndash;FY2026</span></div>
@@ -155,7 +155,7 @@
       <div id="fig-season"></div>
       <p class="figcap" id="cap-season"></p>
     </div>
-      <p class="bridge">Knowing when a loan fails is only half of the loss. The other half is how much is left when it does.</p>
+      <p class="bridge">Default timing establishes one term of expected loss. The second term is the share of principal lost when a default occurs.</p>
   </div>
 </section>
 
@@ -186,7 +186,7 @@
       <div id="fig-driver"></div>
       <p class="figcap" id="cap-driver"></p>
     </div>
-      <p class="bridge">Frequency and severity, both measured. Multiply them and you have a price for a single borrower.</p>
+      <p class="bridge">Frequency and severity are both measured directly. Their product is the expected loss on an individual borrower.</p>
   </div>
 </section>
 
@@ -233,7 +233,7 @@
           in five-year expected loss.</p>
       </div>
     </div>
-      <p class="bridge">That is the machinery. Whether to believe any of it is a separate question.</p>
+      <p class="bridge">The preceding sections define the model. Its accuracy against unseen loans is examined next.</p>
   </div>
 </section>
 
@@ -244,8 +244,8 @@
       <div class="step ui">Four. Does it work</div>
       <h2>Predicted against observed default rates</h2>
       <p>The model was fitted on one sample and tested on a disjoint holdout. Predicted and observed
-        monthly default rates are shown by loan age. The observed series starts hidden, which makes
-        for a fairer test of the chart than reading the R&sup2; off a caption.</p>
+        monthly default rates are shown by loan age. The observed series is concealed initially, so that
+        the fit can be judged before the summary statistic is read.</p>
     </div>
 
     <div class="fig">
@@ -271,7 +271,7 @@
       <p class="figcap">One marker per size-and-industry segment. Positive error means the model
         over-predicted the monthly default rate.</p>
     </div>
-      <p class="bridge">The model holds up. So the next question is what one of these loans actually costs the bank that makes it.</p>
+      <p class="bridge">With the model validated, the remaining question is what a loan of this kind costs the institution originating it.</p>
   </div>
 </section>
 
@@ -298,7 +298,7 @@
       <div id="fig-scatter"></div>
       <p class="figcap" id="cap-scatter"></p>
     </div>
-      <p class="bridge">A third of these profiles are priced below their own cost. Someone has to cover the gap.</p>
+      <p class="bridge">A substantial share of these profiles is priced below cost. The following section examines how that shortfall is absorbed.</p>
   </div>
 </section>
 
@@ -317,7 +317,7 @@
     <div class="fig">
       <div class="fig-top">
         <h3 id="gs-title">Cost of this loan, against what lenders charged it</h3>
-        <div class="ctl"><span class="lbl">Cost assumptions are set in the panel on the left</span></div>
+        <div class="ctl"><span class="lbl">Cost assumptions are set in the panel on the left.</span></div>
       </div>
       <div id="fig-stack"></div>
       <p class="figcap" id="cap-stack"></p>
@@ -335,7 +335,7 @@
       <div id="fig-split" style="margin-top:20px"></div>
       <p class="figcap" id="cap-policy"></p>
     </div>
-      <p class="bridge">That is the argument. Here is what would weaken it.</p>
+      <p class="bridge">The preceding sections set out the argument. The limitations that qualify it follow.</p>
   </div>
 </section>
 

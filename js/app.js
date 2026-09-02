@@ -224,11 +224,11 @@ function renderSurvival() {
     const peak = path[pk], end = path[path.length - 1];
     const to90 = path.find(v => v.hazard >= .9 * peak.hazard);
     shape = peak.month >= end.month
-      ? `The monthly default rate is still climbing at month 120. It reaches 90% of its maximum by
-         month ${to90.month} and never turns back toward safety inside the modelled window.`
-      : `The monthly rate peaks at month ${peak.month}, then falls, ending
+      ? `The monthly default rate is still rising at month 120, having reached 90% of its maximum by
+         month ${to90.month}. No decline occurs within the modelled window.`
+      : `The monthly default rate peaks at month ${peak.month} and then declines, ending
          ${((1 - end.hazard / peak.hazard) * 100).toFixed(0)}% below that maximum. Under crisis
-         coefficients the loans that fail do so early.`;
+         coefficients, defaults are concentrated early in the life of the loan.`;
   }
   $('#cap-surv').innerHTML = !p60 ? '' :
     `<b>${(p60.cum * 100).toFixed(1)} of 100 loans default within five years</b>;
@@ -588,8 +588,8 @@ function renderErrors() {
   host.insertAdjacentHTML('beforeend',
     `<p class="note" style="margin-top:10px">${segs.length} segments carry 100 or more defaults.
      Mean error <b>${(me * 100).toFixed(4)} percentage points</b>, with a maximum absolute error of
-     ${(Math.max(...errs.map(Math.abs)) * 100).toFixed(2)}. Worth showing the segments it handles
-     badly alongside the ones it handles well. The gold marker, where present, is your selection.</p>`);
+     ${(Math.max(...errs.map(Math.abs)) * 100).toFixed(2)}. Segments the model fits poorly are shown
+     alongside those it fits well. The gold marker, where present, indicates the selected segment.</p>`);
 }
 
 /* =========================================================== scatter */
@@ -648,7 +648,7 @@ function renderScatter() {
     `${M.fmtNum(rows.length)} profiles have both a model price and an observed rate.
      <b>${M.fmtNum(ok)} of them clear their own cost${S.scGuar ? ' once the guarantee is applied' : ' with no government support at all'}</b>.
      Marker size is the number of loans in the profile. A further <b>${M.fmtNum(needs)}</b> clear only
-     once the guarantee is applied, which is the group the programme is arguably there for.
+     once the guarantee is applied.
      ${S.scThin
         ? 'Only profiles with 100 or more loans are shown; removing the filter roughly triples the sample, most of it one or two loans deep.'
         : 'The loan-count filter is off, so much of this sample rests on very few loans.'}`;
@@ -753,10 +753,10 @@ function renderDriver() {
      ${(d.size_band.range * 100).toFixed(1)}.</b> Secured loans lose
      ${(d.collateral.rows.find(r => /true/i.test(r.label))?.lgd * 100).toFixed(1)}% of principal on
      default against ${(d.collateral.rows.find(r => /false/i.test(r.label))?.lgd * 100).toFixed(1)}%
-     for unsecured. That gap is small enough to be noise, which is awkward, because collateral is
-     usually the first question a credit committee asks. Severity is therefore keyed off size and
-     industry. Collateral is kept in the default probability, where its coefficient does carry
-     information.`;
+     for unsecured, a difference within the range of noise. Collateral is conventionally the first
+     item examined in credit assessment, but it carries no measurable information about severity in
+     this record. Severity is therefore keyed off size and industry. Collateral is retained in the
+     default probability, where its coefficient remains material.`;
 }
 
 /* ========================================================= cost stack */
@@ -879,9 +879,10 @@ function renderPolicy() {
      <b>With no guarantee, ${zero.n} clear on commercial terms. At ${S.policyG}% the figure is ${cur.n},
      and at 90% it is ${top.n}.</b> Returns diminish across the range: the first 45 points of
      guarantee add ${firstHalf} profiles, the next 45 add ${secondHalf}, and the largest single
-     increment is the step to ${bestStep.at}%, adding ${bestStep.gain}. Past the midpoint the guarantee
-     mostly deepens coverage on loans that already clear rather than bringing in new borrowers. That
-     may still be worth paying for, but it is a different argument and this chart cannot settle it.`;
+     increment is the step to ${bestStep.at}%, adding ${bestStep.gain}. Above the midpoint the guarantee
+     principally deepens coverage on loans that already clear rather than extending access to new
+     borrowers. Whether that additional coverage is warranted is a separate question, and one this
+     chart does not address.`;
 }
 
 /* ============================================================ limits */
@@ -922,13 +923,14 @@ function renderSplit() {
       ${line('Need the guarantee', needs, 'thin')}
       ${line('Never clear', never, 'no')}
     </table>
-    <p class="figcap">This is the finding the rest of the page builds toward.
+    <p class="figcap">This is the result toward which the preceding sections build.
       <b>${needs.length} profiles clear only because the guarantee exists.</b> They are
       ${(100 * L(needs) / tL).toFixed(0)}% of all loans and ${(100 * D(needs) / tD).toFixed(1)}% of
-      all dollars. The guarantee is not subsidising volume. It is reaching a large number of very
-      small borrowers, and ${needs.filter(r => r[ix.size] === '<50K' || r[ix.size] === '50-150K').length}
-      of the ${needs.length} are loans under $150,000. A further ${never.length} profiles do not clear
-      even at their full guarantee.</p>`;
+      all dollars. The guarantee therefore functions less as a subsidy on volume than as a mechanism for
+      reaching a large number of very small borrowers:
+      ${needs.filter(r => r[ix.size] === '<50K' || r[ix.size] === '50-150K').length} of the
+      ${needs.length} are loans under $150,000. A further ${never.length} profiles do not clear even
+      at their full guarantee.</p>`;
 }
 
 
